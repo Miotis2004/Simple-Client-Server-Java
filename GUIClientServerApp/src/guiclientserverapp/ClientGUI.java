@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author ravie
+ * @author Ronald Joubert
  */
 public class ClientGUI extends javax.swing.JDialog {
 
@@ -122,29 +122,27 @@ public class ClientGUI extends javax.swing.JDialog {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(outputArea, javax.swing.GroupLayout.DEFAULT_SIZE, 407, Short.MAX_VALUE)
-                        .addGap(18, 18, 18))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(35, 35, 35)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtCustomerName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnAddCustomers)
-                        .addGap(37, 37, 37)
-                        .addComponent(jLabel2)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtProductName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnAddProducts)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap()
+                .addComponent(outputArea, javax.swing.GroupLayout.DEFAULT_SIZE, 407, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(btnGetCustomers)
                 .addGap(15, 15, 15)
                 .addComponent(btnGetProducts)
                 .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(35, 35, 35)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtCustomerName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnAddCustomers)
+                .addGap(37, 37, 37)
+                .addComponent(jLabel2)
+                .addGap(18, 18, 18)
+                .addComponent(txtProductName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnAddProducts)
+                .addGap(113, 257, Short.MAX_VALUE))
         );
 
         pack();
@@ -152,29 +150,34 @@ public class ClientGUI extends javax.swing.JDialog {
 
     private void btnGetProductsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetProductsActionPerformed
         try {
-            ArrayList<Objects> productList = RetrieveObject(1);
+            ArrayList<DataContainer> productList = RetrieveObject(1);
             
-            for (int i = 0; i < productList.size(); i++) {
-                txtArea.append(productList.get(i).getObjectName());
-                txtArea.append("\n");
+            if(productList.size() > 0){
+                for (int i = 0; i < productList.size(); i++) {
+                    txtArea.append(productList.get(i).getObjectName());
+                    txtArea.append("\n");
+                }
+            }else{
+                txtArea.append("Product list is empty. \n");
             }
+            txtArea.append("\n");
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnGetProductsActionPerformed
 
     private void btnAddProductsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddProductsActionPerformed
-        Objects object = new Objects();
+        DataContainer object = new DataContainer();
         object.setObjectName(txtProductName.getText());
-        object.setDataType(Objects.PRODUCT);
+        object.setDataType(DataContainer.PRODUCT);
         SendObject(object);
         txtProductName.setText(null);
     }//GEN-LAST:event_btnAddProductsActionPerformed
 
     private void btnAddCustomersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddCustomersActionPerformed
-        Objects object = new Objects();
+        DataContainer object = new DataContainer();
         object.setObjectName(txtCustomerName.getText());
-        object.setDataType(Objects.CUSTOMER);
+        object.setDataType(DataContainer.CUSTOMER);
         object.setReturnType(0);
         SendObject(object);
         txtCustomerName.setText(null);
@@ -182,21 +185,28 @@ public class ClientGUI extends javax.swing.JDialog {
 
     private void btnGetCustomersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetCustomersActionPerformed
         try {
-            ArrayList<Objects> customerList = RetrieveObject(2);
+            ArrayList<DataContainer> customerList = RetrieveObject(2);
             
-            for (int i = 0; i < customerList.size(); i++) {
-                txtArea.append(customerList.get(i).getObjectName());
-                txtArea.append("\n");
+            if(customerList.size() > 0){
+                for (int i = 0; i < customerList.size(); i++) {
+                    txtArea.append(customerList.get(i).getObjectName());
+                    txtArea.append("\n");
+                }
+            }else{
+                txtArea.append("Customer list is empty. \n");
             }
+            txtArea.append("\n");
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnGetCustomersActionPerformed
-    public static void SendObject(Objects obj)
+    public static void SendObject(DataContainer obj)
     {
+        ConnectionSettings connection = new ConnectionSettings();
+        
         try 
         {
-            Socket socket = new Socket("localhost", 67);
+            Socket socket = new Socket(connection.hostAddress, connection.portNumber);
             
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
@@ -212,23 +222,25 @@ public class ClientGUI extends javax.swing.JDialog {
         }
     }
     
-    public static ArrayList<Objects> RetrieveObject(int returnType) throws ClassNotFoundException
+    public static ArrayList<DataContainer> RetrieveObject(int returnType) throws ClassNotFoundException
     {
+        ConnectionSettings connection = new ConnectionSettings();
+        
         try 
         {
-            Socket socket = new Socket("localhost", 67);
+            Socket socket = new Socket(connection.hostAddress, connection.portNumber);
             
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             
-            Objects obj = new Objects();
+            DataContainer obj = new DataContainer();
             obj.setReturnType(returnType);
             
             out.writeObject(obj);
             out.flush();
             System.out.println("Sent Object");
             
-            ArrayList<Objects> myList = (ArrayList<Objects>) in.readObject();
+            ArrayList<DataContainer> myList = (ArrayList<DataContainer>) in.readObject();
             socket.close();
             
             return myList;

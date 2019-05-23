@@ -1,3 +1,6 @@
 Widget
 Midget
 Gidget
+Widget
+Product 1
+Product 2

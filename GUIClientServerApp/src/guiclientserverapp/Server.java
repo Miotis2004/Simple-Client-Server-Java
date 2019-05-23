@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author ravie
+ * @author Ronald Joubert
  */
 public class Server {
 
@@ -27,34 +27,42 @@ public class Server {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        ServerSocket server = new ServerSocket(67);
-        System.out.println("Server Started");
+        ServerGUI sg = new ServerGUI();
+        sg.setVisible(true);
         
-        while (true) {            
+        ConnectionSettings connection = new ConnectionSettings();
+        
+        ServerSocket server = new ServerSocket(connection.portNumber);
+        sg.DisplayMessage("Server Started");
+        
+        //Live code
+        /*while(true)
+        {
             Socket socket = server.accept();
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            RunnableClientManager cm = new RunnableClientManager(socket.getInputStream(), socket.getOutputStream(), sg);
+            Thread thread = new Thread(cm);
+            thread.start();
             
-            Objects request = (Objects) in.readObject();
-            
-            System.out.println("Object Received");
-            
-            if (request.getReturnType() == 1) {
-                ArrayList<Objects> myList = ReadFile(1);
-                out.writeObject(myList);
-                out.flush();
-            }else if (request.getReturnType() == 2) {
-                ArrayList<Objects> myList = ReadFile(2);
-                out.writeObject(myList);
-                out.flush();
-            }else if (request.getReturnType() == 0) {
-                WriteToFile(request);
-            }
-            
+        }
+         */       
+        
+        //Test code
+        int counter = 0;
+        
+        while(true)
+        {
+            Socket socket = server.accept();
+            RunnableClientManager cm = new RunnableClientManager(socket.getInputStream(), socket.getOutputStream(), sg);
+            Thread thread = new Thread(cm);
+            thread.start();
+            counter++;
+            sg.DisplayMessage("New Connection Made " + counter);
         }
     }
     
-    public static void WriteToFile(Objects obj)
+    
+    
+    public static void WriteToFile(DataContainer obj)
     {
         boolean fileCreated = false;
         boolean isValid = false;
@@ -111,9 +119,9 @@ public class Server {
         }
     }
     
-    public static ArrayList<Objects> ReadFile(int dataType)
+    public static ArrayList<DataContainer> ReadFile(int dataType)
     {
-        ArrayList<Objects> data = new ArrayList<Objects>();
+        ArrayList<DataContainer> data = new ArrayList<DataContainer>();
         
         String fileName = "";
         
@@ -132,7 +140,7 @@ public class Server {
             
             while(line != null)
             {
-            Objects obj = new Objects();
+            DataContainer obj = new DataContainer();
             obj.setObjectName(line);
             data.add(obj);
             line = br.readLine();
@@ -144,4 +152,6 @@ public class Server {
         
         return data;
     }
+    
+    
 }
